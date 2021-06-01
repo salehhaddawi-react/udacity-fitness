@@ -1,21 +1,28 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import {Ionicons} from '@expo/vector-icons';
+import {StyleSheet, Text, View} from 'react-native';
 import AddEntry from "./components/AddEntry";
+import {createStore} from "redux";
+import {Provider} from "react-redux";
+import reducer from './reducers'
+
+
+const store = createStore(reducer);
 
 export default function App() {
-  return (
-    <View>
-      <AddEntry/>
-    </View>
-  );
+    return (
+        <Provider store={store}>
+            <View>
+                <AddEntry/>
+            </View>
+        </Provider>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
 });

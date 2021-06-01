@@ -1,13 +1,26 @@
 import React, {useState} from "react";
-import {View, Text, TouchableOpacity, Button} from "react-native";
-import {getMetricMetaInfo, timeToString} from "../utils/helpers";
+import {View, Text, Button} from "react-native";
+import {getDailyReminderMessage, getMetricMetaInfo, timeToString} from "../utils/helpers";
 import UdacitySlider from "./UdacitySlider";
 import UdacitySteppers from "./UdacitySteppers";
 import DateHeader from "./DateHeader";
 import TextButton from "./TextButton";
 import {Ionicons} from "@expo/vector-icons";
+import {removeEntry, submitEntry} from "../utils/api";
+import {useDispatch, useSelector} from "react-redux";
+import {addEntry} from "../actions";
 
-export default function AddEntry(props) {
+export default function AddEntry() {
+    const dispatch = useDispatch();
+
+    const alreadyLoggedEntry = () => {
+        const entries = useSelector((state) => state);
+
+        const key = timeToString();
+
+        return entries[key] && typeof entries[key].today === 'undefined';
+    }
+
     const [state, setState] = useState({
         run: 0,
         bike: 0,
@@ -58,10 +71,14 @@ export default function AddEntry(props) {
         });
 
         // TODO: update Redux
+        dispatch(addEntry({
+            [key]: entry
+        }));
 
         // TODO: navigate to home
 
-        // TODO: save to DB
+        // TODO: save to 'DB'
+        submitEntry({ entry, key });
 
         // TODO: clear local notifications
     }
@@ -70,15 +87,19 @@ export default function AddEntry(props) {
         const key = timeToString();
 
         // TODO: update Redux
+        dispatch(addEntry({
+            [key]: getDailyReminderMessage()
+        }));
 
         // TODO: navigate to home
 
-        // TODO: update DB
+        // TODO: update 'DB'
+        removeEntry(key);
     }
 
     const metaInfo = getMetricMetaInfo();
 
-    if (props.alreadyLogged) {
+    if (alreadyLoggedEntry()) {
         return (
             <View>
                 <Ionicons name="ios-happy-outline" size={100} />
@@ -93,7 +114,6 @@ export default function AddEntry(props) {
     return (
         <View>
             <DateHeader date={new Date().toLocaleDateString()}/>
-            <Text>{JSON.stringify(state)}</Text>
             {Object.keys(metaInfo).map(key => {
                 const {getIcon, type, ...rest} = metaInfo[key];
                 const value = state[key];
