@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {View, Text, Button} from "react-native";
+import {View, Text, TouchableOpacity, Platform, StyleSheet} from "react-native";
 import {getDailyReminderMessage, getMetricMetaInfo, timeToString} from "../utils/helpers";
 import UdacitySlider from "./UdacitySlider";
 import UdacitySteppers from "./UdacitySteppers";
@@ -9,6 +9,15 @@ import {Ionicons} from "@expo/vector-icons";
 import {removeEntry, submitEntry} from "../utils/api";
 import {useDispatch, useSelector} from "react-redux";
 import {addEntry} from "../actions";
+import {purple, white} from "../utils/colors";
+
+function SubmitBtn ({ onPress }) {
+    return (
+        <TouchableOpacity style={Platform.OS === "ios" ? styles.iosSubmitBtn : styles.AndroidSubmitBtn} onPress={onPress}>
+            <Text style={styles.submitBtnText}>SUBMIT</Text>
+        </TouchableOpacity>
+    );
+}
 
 export default function AddEntry() {
     const dispatch = useDispatch();
@@ -101,10 +110,10 @@ export default function AddEntry() {
 
     if (alreadyLoggedEntry()) {
         return (
-            <View>
-                <Ionicons name="ios-happy-outline" size={100} />
+            <View style={styles.center}>
+                <Ionicons name={Platform.OS === 'ios' ? 'ios-happy-outline' : 'md-happy'} size={100} />
                 <Text>You already Logged your data for today</Text>
-                <TextButton onPress={reset}>
+                <TextButton onPress={reset} style={{padding: 10}}>
                     Reset
                 </TextButton>
             </View>
@@ -112,14 +121,14 @@ export default function AddEntry() {
     }
 
     return (
-        <View>
+        <View style={styles.container}>
             <DateHeader date={new Date().toLocaleDateString()}/>
             {Object.keys(metaInfo).map(key => {
                 const {getIcon, type, ...rest} = metaInfo[key];
                 const value = state[key];
 
                 return (
-                    <View key={key}>
+                    <View key={key} style={styles.row}>
                         {getIcon()}
                         {type === 'slider' ?
                             <UdacitySlider value={value} onChange={(val) => slide(key, val)} {...rest}/> :
@@ -128,7 +137,52 @@ export default function AddEntry() {
                     </View>
                 )
             })}
-            <Button onPress={submit} title={'Submit'}/>
+            <SubmitBtn onPress={submit} />
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 20,
+        backgroundColor: white
+    },
+    row: {
+        flexDirection: "row",
+        flex: 1,
+        alignItems: "center"
+    },
+    iosSubmitBtn: {
+        backgroundColor: purple,
+        padding: 10,
+        borderRadius: 7,
+        height: 45,
+        marginLeft: 40,
+        marginRight: 40
+    },
+    AndroidSubmitBtn: {
+        backgroundColor: purple,
+        padding: 10,
+        paddingLeft: 30,
+        paddingRight: 30,
+        height: 45,
+        borderRadius: 2,
+        alignSelf: "flex-end",
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    submitBtnText: {
+        color: white,
+        fontSize: 22,
+        textAlign: "center"
+    },
+    center: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginLeft: 30,
+        marginRight: 30
+    }
+});
+
