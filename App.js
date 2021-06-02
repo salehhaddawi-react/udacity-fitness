@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {StyleSheet, Text, View, StatusBar} from 'react-native';
 import AddEntry from "./components/AddEntry";
 import {createStore} from "redux";
@@ -10,6 +10,7 @@ import {CALENDAR_STORAGE_KEY} from "./utils/calendar";
 import {purple} from "./utils/colors";
 import {Constants} from "react-native-unimodules";
 import Live from "./components/Live";
+import {setLocalNotification} from "./utils/helpers";
 
 function UdacityStatusBar({ backgroundColor, ...props }) {
     return (
@@ -23,7 +24,11 @@ function UdacityStatusBar({ backgroundColor, ...props }) {
 const store = createStore(reducer);
 
 export default function App() {
-    AsyncStorage.removeItem(CALENDAR_STORAGE_KEY)
+
+    useEffect(() => {
+        setLocalNotification();
+    }, [])
+
     return (
         <Provider store={store}>
             <View style={{flex: 1}}>
@@ -48,15 +53,3 @@ const styles = StyleSheet.create({
         margin: 10,
     }
 })
-
-/*
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-});
-*/

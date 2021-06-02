@@ -1,6 +1,12 @@
 import React, {useState} from "react";
 import {View, Text, TouchableOpacity, Platform, StyleSheet} from "react-native";
-import {getDailyReminderMessage, getMetricMetaInfo, timeToString} from "../utils/helpers";
+import {
+    clearLocalNotifications,
+    getDailyReminderMessage,
+    getMetricMetaInfo,
+    setLocalNotification,
+    timeToString
+} from "../utils/helpers";
 import UdacitySlider from "./UdacitySlider";
 import UdacitySteppers from "./UdacitySteppers";
 import DateHeader from "./DateHeader";
@@ -90,6 +96,7 @@ export default function AddEntry() {
         submitEntry({ entry, key });
 
         // TODO: clear local notifications
+        clearLocalNotifications().then(setLocalNotification)
     }
 
     const reset = () => {

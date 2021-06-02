@@ -2,6 +2,10 @@ import React from "react";
 import {View, StyleSheet} from 'react-native';
 import {FontAwesome, MaterialIcons, MaterialCommunityIcons} from '@expo/vector-icons';
 import {red, orange, pink, lightPurp, blue, white} from "./colors";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Notifications from 'expo-notifications';
+
+export const NOTIFICATIONS_STORAGE_KEY = 'UdaciFitness:notifications'
 
 const styles = StyleSheet.create({
     iconContainer: {
@@ -140,4 +144,57 @@ export function getDailyReminderMessage() {
     return {
         today: 'Don\'t forget to log your data'
     }
+}
+
+export function clearLocalNotifications() {
+    return AsyncStorage.removeItem(NOTIFICATIONS_STORAGE_KEY)
+        .then(Notifications.cancelAllScheduledNotificationsAsync);
+}
+
+export function createNotification() {
+    return {
+        title: 'Log your stats',
+        body: 'don\'t forget to log your stats for today',
+        ios: {
+            sound: true
+        },
+        android: {
+            sound: true,
+            sticky: false,
+            vibrate: true,
+            priority: 'high'
+        }
+    }
+}
+
+export function setLocalNotification() {
+    AsyncStorage.getItem(NOTIFICATIONS_STORAGE_KEY)
+        .then(JSON.parse)
+        .then((data) => {
+            if (data === null) {
+                Notifications.requestPermissionsAsync()
+                    .then(({status}) => {
+                        if (status === 'granted') {
+                            Notifications.cancelAllScheduledNotificationsAsync()
+                                .catch((error) => console.warn('Error while cancelling all notifications:', error));
+
+                            let tomorrow = new Date();
+
+                            tomorrow.setDate(tomorrow.getDate() + 1);
+                            tomorrow.setHours(20);
+                            tomorrow.setMinutes(0);
+
+                            Notifications.scheduleNotificationAsync(
+                                createNotification(),
+                                {
+                                    time: tomorrow,
+                                    repeats: true
+                                }
+                            ).catch((error) => console.warn('Error while scheduleNotificationAsync :', error));
+
+                            AsyncStorage.setItem(NOTIFICATIONS_STORAGE_KEY, 'true');
+                        }
+                    })
+            }
+        })
 }

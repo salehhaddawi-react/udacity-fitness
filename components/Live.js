@@ -32,7 +32,7 @@ export default function Live () {
     }, []);
 
     const askPermission = () => {
-        Location.getForegroundPermissionsAsync()
+        Location.requestForegroundPermissionsAsync()
             .then(({ status }) => {
                 if (status === 'granted') {
                     setLocation();
@@ -63,6 +63,9 @@ export default function Live () {
             setStatus('granted');
             setCoords(coords);
             setDirection(newDirection);
+        }).catch((error) => {
+            console.warn('Error while Setting location:', e);
+            setStatus('undetermined');
         });
     }
 
